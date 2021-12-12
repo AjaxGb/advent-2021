@@ -1,0 +1,47 @@
+[package]
+name = "advent-2021"
+version = "0.1.0"
+authors = ["Sol Toder <ajaxgb@gmail.com>"]
+edition = "2021"
+
+[[bin]]
+name = "day01"
+path = "src/day01/bin.rs"
+[[bin]]
+name = "day02"
+path = "src/day02/bin.rs"
+[[bin]]
+name = "day03"
+path = "src/day03/bin.rs"
+[[bin]]
+name = "day04"
+path = "src/day04/bin.rs"
+[[bin]]
+name = "day05"
+path = "src/day05/bin.rs"
+[[bin]]
+name = "day06"
+path = "src/day06/bin.rs"
+[[bin]]
+name = "day07"
+path = "src/day07/bin.rs"
+[[bin]]
+name = "day08"
+path = "src/day08/bin.rs"
+[[bin]]
+name = "day09"
+path = "src/day09/bin.rs"
+[[bin]]
+name = "day10"
+path = "src/day10/bin.rs"
+[[bin]]
+name = "day11"
+path = "src/day11/bin.rs"
+[[bin]]
+name = "day12"
+path = "src/day12/bin.rs"
+
+[dependencies]
+itertools = "0.10.1"
+collect_array = "0.1"
+arrayvec = "0.7"
