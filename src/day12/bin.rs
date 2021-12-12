@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::time::Instant;
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Cave {
@@ -153,6 +152,8 @@ impl<'a> CaveSystemBuilder<'a> {
 }
 
 pub fn main() {
+    use std::time::Instant;
+
     let before_build_time = Instant::now();
 
     let mut builder = CaveSystemBuilder::new();
