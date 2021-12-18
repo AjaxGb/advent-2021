@@ -1,4 +1,4 @@
-use std::{str::FromStr, fmt::Display};
+use std::{fmt::Display, str::FromStr};
 
 use bitvec::{prelude::*, view::BitView};
 use itertools::Itertools;
@@ -191,57 +191,57 @@ impl Packet {
             }
         }
     }
-	
-	fn fmt_part(&self, f: &mut std::fmt::Formatter<'_>, enclosed: bool) -> std::fmt::Result {
+
+    fn fmt_part(&self, f: &mut std::fmt::Formatter<'_>, enclosed: bool) -> std::fmt::Result {
         Ok(match &self.payload {
             PacketPayload::Literal(val) => write!(f, "{}", val)?,
             PacketPayload::Operation(op, operands) => {
-				let (mid, is_func) = match op {
-					Operation::Sum => (" + ", false),
-					Operation::Product => (" * ", false),
-					Operation::Min => {
-						write!(f, "min(")?;
-						(", ", true)
-					},
-					Operation::Max => {
-						write!(f, "max(")?;
-						(", ", true)
-					},
-				};
-				if !is_func && operands.len() == 1 {
-					return operands[0].fmt_part(f, enclosed);
-				}
-				if !is_func && !enclosed {
-					write!(f, "(")?;
-				}
-				let mut operands = operands.iter();
-				operands.next().unwrap().fmt_part(f, false)?;
-				for operand in operands {
-					write!(f, "{}", mid)?;
-					operand.fmt_part(f, is_func)?;
-				}
-				if is_func || !enclosed {
-					write!(f, ")")?;
-				}
-			},
+                let (mid, is_func) = match op {
+                    Operation::Sum => (" + ", false),
+                    Operation::Product => (" * ", false),
+                    Operation::Min => {
+                        write!(f, "min(")?;
+                        (", ", true)
+                    }
+                    Operation::Max => {
+                        write!(f, "max(")?;
+                        (", ", true)
+                    }
+                };
+                if !is_func && operands.len() == 1 {
+                    return operands[0].fmt_part(f, enclosed);
+                }
+                if !is_func && !enclosed {
+                    write!(f, "(")?;
+                }
+                let mut operands = operands.iter();
+                operands.next().unwrap().fmt_part(f, false)?;
+                for operand in operands {
+                    write!(f, "{}", mid)?;
+                    operand.fmt_part(f, is_func)?;
+                }
+                if is_func || !enclosed {
+                    write!(f, ")")?;
+                }
+            }
             PacketPayload::Comparison(op, operands) => {
-				let [a, b] = operands.as_ref();
-				if !enclosed {
-					write!(f, "(")?;
-				}
-				a.fmt_part(f, false)?;
-				match op {
-					Comparison::GreaterThan => write!(f, " > ")?,
-					Comparison::LessThan => write!(f, " < ")?,
-					Comparison::EqualTo => write!(f, " = ")?,
-				}
-				b.fmt_part(f, false)?;
-				if !enclosed {
-					write!(f, ")")?;
-				}
-			},
+                let [a, b] = operands.as_ref();
+                if !enclosed {
+                    write!(f, "(")?;
+                }
+                a.fmt_part(f, false)?;
+                match op {
+                    Comparison::GreaterThan => write!(f, " > ")?,
+                    Comparison::LessThan => write!(f, " < ")?,
+                    Comparison::EqualTo => write!(f, " = ")?,
+                }
+                b.fmt_part(f, false)?;
+                if !enclosed {
+                    write!(f, ")")?;
+                }
+            }
         })
-	}
+    }
 }
 
 impl Display for Packet {
@@ -268,7 +268,7 @@ impl FromStr for Packet {
 pub fn main() {
     for line in include_str!("input.txt").lines() {
         let packet_tree: Packet = line.parse().unwrap();
-		println!("{}", packet_tree);
+        println!("{}", packet_tree);
         println!("P1: version sum is {}", packet_tree.version_sum());
         println!("P2: evaluation is {}", packet_tree.evaluate());
     }
@@ -280,7 +280,7 @@ mod tests {
 
     fn test_value(hex: &str, value: u64) {
         let packet: Packet = hex.parse().unwrap();
-		let eval_value = packet.evaluate();
+        let eval_value = packet.evaluate();
         assert_eq!(eval_value, value);
     }
 
