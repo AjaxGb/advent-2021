@@ -80,21 +80,26 @@ impl Game {
     }
 
     #[must_use]
-    pub fn play_quantum<D: QuantumDie>(self, die: &mut D, win_score: u32) -> QuantumWinState {
+    pub fn play_quantum<D: QuantumDie>(self, die: &D, win_score: u32) -> QuantumWinState {
         let mut cached_wins = HashMap::new();
 
-        let mut roll_sums = Vec::with_capacity(die.roll().len().pow(3));
+        let mut roll_sums = HashMap::new();
         for roll1 in die.roll() {
             for roll2 in die.roll() {
                 for roll3 in die.roll() {
-                    roll_sums.push(roll1 + roll2 + roll3);
+                    *roll_sums.entry(roll1 + roll2 + roll3).or_default() += 1;
                 }
             }
         }
+        let roll_sums = {
+            let mut v = vec![];
+            v.extend(roll_sums);
+            v
+        };
 
         fn play_verse(
             game: Game,
-            roll_sums: &[u32],
+            roll_sums: &[(u32, u64)],
             win_score: u32,
             cached_wins: &mut HashMap<Game, QuantumWinState>,
         ) -> QuantumWinState {
@@ -103,21 +108,22 @@ impl Game {
             } else {
                 let mut p1_wins = 0;
                 let mut p2_wins = 0;
-                for roll in roll_sums {
+                for (roll, roll_count) in roll_sums {
                     let mut after_p1 = game.clone();
                     after_p1.p1.advance(*roll);
                     if after_p1.p1.score() >= win_score {
-                        p1_wins += 1;
+                        p1_wins += roll_count;
                     } else {
-                        for roll in roll_sums {
+                        for (roll, roll2_count) in roll_sums {
+                            let roll_count = roll_count * roll2_count;
                             let mut after_p2 = after_p1.clone();
                             after_p2.p2.advance(*roll);
                             if after_p2.p2.score() >= win_score {
-                                p2_wins += 1;
+                                p2_wins += roll_count;
                             } else {
                                 let rest = play_verse(after_p2, roll_sums, win_score, cached_wins);
-                                p1_wins += rest.p1_wins;
-                                p2_wins += rest.p2_wins;
+                                p1_wins += rest.p1_wins * roll_count;
+                                p2_wins += rest.p2_wins * roll_count;
                             }
                         }
                     }
@@ -217,8 +223,8 @@ fn main() {
         loser_score * win_state.num_rolls
     );
 
-    let mut die = DiracDie::default();
-    let win_state = game.play_quantum(&mut die, 21);
+    let die = DiracDie::default();
+    let win_state = game.play_quantum(&die, 21);
     let (min_wins, max_wins) = win_state.min_max_wins();
     println!("P2: quantum wins: {} >= {}", max_wins, min_wins);
 }
