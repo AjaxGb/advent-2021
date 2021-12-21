@@ -91,11 +91,7 @@ impl Game {
                 }
             }
         }
-        let roll_sums = {
-            let mut v = vec![];
-            v.extend(roll_sums);
-            v
-        };
+        let roll_sums: Vec<_> = roll_sums.into_iter().collect();
 
         fn play_verse(
             game: Game,
