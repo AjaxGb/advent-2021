@@ -17,7 +17,6 @@ pub struct Player {
 }
 
 impl Player {
-    #[must_use]
     pub fn new(pos: u8) -> Self {
         assert!(
             1 < pos && pos <= 10,
@@ -30,12 +29,10 @@ impl Player {
         }
     }
 
-    #[must_use]
     pub fn pos(&self) -> u8 {
         self.pos + 1
     }
 
-    #[must_use]
     pub fn score(&self) -> u32 {
         self.score
     }
@@ -53,7 +50,6 @@ pub struct Game {
 }
 
 impl Game {
-    #[must_use]
     pub fn new_game(p1_pos: u8, p2_pos: u8) -> Self {
         Self {
             p1: Player::new(p1_pos),
