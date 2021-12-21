@@ -62,32 +62,24 @@ impl Game {
     }
 
     #[must_use]
-    fn get_players(&mut self, p1s_turn: bool) -> (&mut Player, &Player) {
-        if p1s_turn {
-            (&mut self.p1, &self.p2)
-        } else {
-            (&mut self.p2, &self.p1)
-        }
-    }
-
-    #[must_use]
     pub fn play<D: Die>(mut self, die: &mut D, win_score: u32) -> WinState {
         let mut num_rolls = 0;
-        loop {
+        let winner_is_p1 = 'all_rounds: loop {
             for is_p1 in [true, false] {
                 let roll_sum = die.roll() + die.roll() + die.roll();
                 num_rolls += 3;
-                let (curr, other) = self.get_players(is_p1);
+                let curr = if is_p1 { &mut self.p1 } else { &mut self.p2 };
                 curr.advance(roll_sum);
                 if curr.score() >= win_score {
-                    return WinState {
-                        winner_is_p1: is_p1,
-                        winner: curr.clone(),
-                        loser: other.clone(),
-                        num_rolls,
-                    };
+                    break 'all_rounds is_p1;
                 }
             }
+        };
+        WinState {
+            winner_is_p1,
+            p1: self.p1,
+            p2: self.p2,
+            num_rolls,
         }
     }
 
@@ -147,15 +139,43 @@ impl Game {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct WinState {
     pub winner_is_p1: bool,
-    pub winner: Player,
-    pub loser: Player,
+    pub p1: Player,
+    pub p2: Player,
     pub num_rolls: u32,
+}
+
+impl WinState {
+    pub fn winner(&self) -> &Player {
+        if self.winner_is_p1 {
+            &self.p1
+        } else {
+            &self.p2
+        }
+    }
+
+    pub fn loser(&self) -> &Player {
+        if self.winner_is_p1 {
+            &self.p2
+        } else {
+            &self.p1
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct QuantumWinState {
     pub p1_wins: u64,
     pub p2_wins: u64,
+}
+
+impl QuantumWinState {
+    pub fn min_max_wins(&self) -> (u64, u64) {
+        if self.p1_wins > self.p2_wins {
+            (self.p2_wins, self.p1_wins)
+        } else {
+            (self.p1_wins, self.p2_wins)
+        }
+    }
 }
 
 #[derive(Debug, Clone, Hash, Default, PartialEq, Eq)]
@@ -193,19 +213,16 @@ fn main() {
 
     let mut die = DeterministicD100::default();
     let win_state = game.clone().play(&mut die, 1000);
+    let loser_score = win_state.loser().score();
     println!(
         "P1: {} * {} = {}",
-        win_state.loser.score(),
+        loser_score,
         win_state.num_rolls,
-        win_state.loser.score() * win_state.num_rolls
+        loser_score * win_state.num_rolls
     );
 
     let mut die = DiracDie::default();
     let win_state = game.play_quantum(&mut die, 21);
-    let (max_wins, min_wins) = if win_state.p1_wins >= win_state.p2_wins {
-        (win_state.p1_wins, win_state.p2_wins)
-    } else {
-        (win_state.p2_wins, win_state.p1_wins)
-    };
+    let (min_wins, max_wins) = win_state.min_max_wins();
     println!("P2: quantum wins: {} >= {}", max_wins, min_wins);
 }
