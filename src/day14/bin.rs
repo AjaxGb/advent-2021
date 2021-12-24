@@ -1,4 +1,3 @@
-#![feature(destructuring_assignment)]
 use itertools::Itertools;
 use std::collections::HashMap;
 
